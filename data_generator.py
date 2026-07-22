@@ -173,4 +173,4 @@ final_data = final_data.replace('"placeDayTime"', 'placeDayTime')
 final_data = final_data.replace('"icourseRating"', 'icourseRating')
 final_data = final_data.replace('"credit"', 'credit')
 with open(output_file, 'w', encoding='utf-8') as f:
-    f.write('var version="260102";var semester="2026年春季学期";var allLesson=' + final_data + ';')
+    f.write('var version="260622";var semester="2026年秋季学期";var allLesson=' + final_data + ';')
