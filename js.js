@@ -273,10 +273,32 @@ function upload() {
             importedPlanData = JSON.parse(result); // 将读取的内容解析为 JSON 数据
 
             // 防御性检查：确保数据是一个数组
-            if (!Array.isArray(importedPlanData) || importedPlanData[0] != version) {
+            if (!Array.isArray(importedPlanData)) {
                 layer.alert('导入文件格式错误，无法解析课程数据',{title:false,closeBtn:0,icon:2});
                 return;
             }
+            // 检查课程信息的版本是否一致
+            if(importedPlanData[0].substring(0, 4) != version.substring(0, 4)) {
+                layer.alert('导入文件的学期与当前学期不一致，无法导入',{title:false,closeBtn:0,icon:2});
+                return;
+            }
+            else if(importedPlanData[0] != version) {
+                layer.confirm('导入文件版本落后于当前内置版本，原因是教务系统的课程数据有更新，尝试导入但是可能会出错，是否继续？', {title:false,closeBtn:0,icon:3}, function(index){
+                    myCourse = importedPlanData[1];
+                    preference = importedPlanData[2];
+                    // 关闭导入窗口并显示提示
+                    localStorage.setItem("myCourse", JSON.stringify(myCourse));
+                    table.reloadData("courseList", { data: myCourse });
+                    localStorage.setItem("preference", JSON.stringify(preference));
+                    rendersettingTable();
+                    $("#importFile").hide();
+                    $("#menu").show();
+                    layer.alert("导入成功！",{title:false,closeBtn:0,icon:1});
+                    layer.close(index);
+                });
+                return;
+            }
+
             myCourse = importedPlanData[1];
             preference = importedPlanData[2];
             // 关闭导入窗口并显示提示
