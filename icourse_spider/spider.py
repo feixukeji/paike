@@ -1,6 +1,7 @@
 # 必要的依赖项
 import requests
 import json, re
+import html
 import multiprocessing
 import tqdm
 import time
@@ -59,8 +60,16 @@ def get_lesson_data(lessonid):
     score = re.findall(r'<span class="rl-pd-sm h4">([0-9.]+)</span>', r.text)
     if not isNoScoreNow and len(score) == 0:
         return lessonid, name[0], None, '课程评分获取失败'
-    # 获取所有老师, 形如 <h3 class="blue"><a href="/teacher/29/">许小亮</a></h3>
-    teachers = re.findall(r'<h3 class="blue"><a href="/teacher/\d+/">(.+)</a></h3>', r.text)
+    # 获取所有老师；站点可能会在姓名外包一层 <bdi>，这里只保留纯文本姓名
+    teacher_html = re.findall(
+        r'<h3 class="blue">\s*<a href="/teacher/\d+/">(.*?)</a>\s*</h3>',
+        r.text,
+        flags=re.DOTALL,
+    )
+    teachers = [
+        html.unescape(re.sub(r'<[^>]+>', '', teacher)).strip()
+        for teacher in teacher_html
+    ]
 
     if isNoScoreNow:
         return lessonid, name[0], teachers, '暂无评分'
@@ -104,4 +113,3 @@ if __name__ == '__main__':
     # 保存数据
     with open('course_rating.json', 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=4)
-    
